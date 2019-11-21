@@ -108,7 +108,7 @@ dfcolumns = pd.DataFrame(X_train.columns)
 featureScores = pd.concat([dfcolumns,dfscores],axis=1)
 featureScores.columns = ['Specs','Score']  #naming the dataframe columns
 print(featureScores.nsmallest(56,'Score').iloc[:, 0].values)  #print 60 lowest features
-print(featureScores.nlargest(6,'Score').iloc[:, 0].values) #print 6 best features
+print(featureScores.nlargest(10,'Score').iloc[:, 0].values) #print 6 best features
 irrelevant = featureScores.nsmallest(56,'Score').iloc[:, 0].values
 X_train.drop(labels=irrelevant, axis=1, inplace=True)
 X_test.drop(labels=irrelevant, axis=1, inplace=True)
@@ -127,9 +127,12 @@ sm = SMOTE(random_state=27, ratio=1.0)
 X_train, y_train = sm.fit_sample(X_train, y_train)
 X_train = pd.DataFrame(data=X_train)
 print(X_train)
+# 方法2：丟掉No Data
 
 
-# 方法1：AdaBoost(0.87 -> 0.71732) (n_estimators = 200 -> 0.72948)
+
+
+# 方法1：AdaBoost(0.87 -> 0.71732) (n_estimators = 200 -> 0.72948) (ne = 200, dimension = 10, without outlier remove --> 0.75987)
 AdaBoost = AdaBoostClassifier(n_estimators=200,learning_rate=1.0,algorithm='SAMME.R')
 AdaBoost.fit(X_train, y_train)
 prediction = AdaBoost.predict(X_test)
@@ -141,7 +144,7 @@ score = AdaBoost.score(X_train, y_train)
 # score = gb_clf2.score(X_train, y_train)
 
 # 方法3：隨機森林(1.0 -> 0.73252 : n_e = 75(without outlier detection) , n_e lower no enhance)
-# clf = RandomForestClassifier(n_estimators=100,max_features="auto",criterion="gini", bootstrap=True)
+# clf = RandomForestClassifier(n_estimators=250,max_features="auto",criterion="entropy", bootstrap=True)
 # clf.fit(X_train, y_train)
 # prediction = clf.predict(X_test)
 # score = clf.score(X_train, y_train)
