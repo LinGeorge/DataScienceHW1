@@ -194,6 +194,7 @@ print("randomNumber = ", randomNumber)
 # score = gb_clf2.score(X_train, y_train)
 
 # 方法3：隨機森林(1.0 -> 0.73252 : n_e = 75(without outlier detection) , n_e lower no enhance)
+# best
 clf = RandomForestClassifier(n_estimators=250,max_features="auto",criterion="entropy", bootstrap=True)
 clf.fit(X_train, y_train)
 prediction = clf.predict(X_test)
