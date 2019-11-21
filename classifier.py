@@ -114,12 +114,12 @@ X_train.drop(labels=irrelevant, axis=1, inplace=True)
 X_test.drop(labels=irrelevant, axis=1, inplace=True)
 
 # outlier detection and removal
-clf = IsolationForest( behaviour = 'new', max_samples=80, random_state = 1, contamination= 'auto')
-preds = clf.fit_predict(X_train)
-print(preds)
-z = stats.zscore(X_train)
-X_train[(np.abs(z) < 3).all(axis=1)]
-y_train[(np.abs(z) < 3).all(axis=1)]
+# clf = IsolationForest( behaviour = 'new', max_samples=80, random_state = 1, contamination= 'auto')
+# preds = clf.fit_predict(X_train)
+# print(preds)
+# z = stats.zscore(X_train)
+# X_train[(np.abs(z) < 3).all(axis=1)]
+# y_train[(np.abs(z) < 3).all(axis=1)]
 
 # imbalancing data 
 # 方法1：很吃low dimension
@@ -130,10 +130,10 @@ print(X_train)
 
 
 # 方法1：AdaBoost(0.87 -> 0.71732) (n_estimators = 200 -> 0.72948)
-# AdaBoost = AdaBoostClassifier(n_estimators=150,learning_rate=1.0,algorithm='SAMME.R')
-# AdaBoost.fit(X_train, y_train)
-# prediction = AdaBoost.predict(X_test)
-# score = AdaBoost.score(X_train, y_train)
+AdaBoost = AdaBoostClassifier(n_estimators=200,learning_rate=1.0,algorithm='SAMME.R')
+AdaBoost.fit(X_train, y_train)
+prediction = AdaBoost.predict(X_test)
+score = AdaBoost.score(X_train, y_train)
 # 方法2：GradientBoost(0.89 -> 0.70516)
 # gb_clf2 = GradientBoostingClassifier(n_estimators=800, learning_rate=0.5, max_features=3, max_depth=2, random_state=0)
 # gb_clf2.fit(X_train, y_train)
@@ -141,10 +141,10 @@ print(X_train)
 # score = gb_clf2.score(X_train, y_train)
 
 # 方法3：隨機森林(1.0 -> 0.73252 : n_e = 75(without outlier detection) , n_e lower no enhance)
-clf = RandomForestClassifier(n_estimators=100,max_features="auto",criterion="gini", bootstrap=True)
-clf.fit(X_train, y_train)
-prediction = clf.predict(X_test)
-score = clf.score(X_train, y_train)
+# clf = RandomForestClassifier(n_estimators=100,max_features="auto",criterion="gini", bootstrap=True)
+# clf.fit(X_train, y_train)
+# prediction = clf.predict(X_test)
+# score = clf.score(X_train, y_train)
 print(prediction)
 print(score)
 
