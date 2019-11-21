@@ -44,6 +44,7 @@ import matplotlib.pyplot as plt
 from imblearn.over_sampling import SMOTE
 import csv
 from scipy import stats
+from random import random
 np.random.seed(1)
 
 
@@ -142,7 +143,7 @@ fraud = X[X.Ans==1]
 fraud_upsampled = resample(fraud,
                           replace=True, # sample with replacement
                           n_samples=len(not_fraud), # match number in majority class
-                          random_state=27) # reproducible results
+                          random_state=round(random()*1000)) # reproducible results
 
 # combine majority and upsampled minority
 upsampled = pd.concat([not_fraud, fraud_upsampled])
@@ -150,7 +151,7 @@ upsampled = pd.concat([not_fraud, fraud_upsampled])
 not_fraud_downsampled = resample(not_fraud,
                                 replace = False, # sample without replacement
                                 n_samples = len(fraud), # match minority n
-                                random_state = 27) # reproducible results
+                                random_state = round(random()*1000)) # reproducible results
 
 # combine minority and downsampled majority
 downsampled = pd.concat([not_fraud_downsampled, fraud])
@@ -200,7 +201,7 @@ print(score)
 
 
 # 開啟輸出的 CSV 檔案
-with open('output4.csv', 'w', newline='') as csvfile:
+with open('output5.csv', 'w', newline='') as csvfile:
     # 建立 CSV 檔寫入器
     writer = csv.writer(csvfile)
     # 寫入一列資料
