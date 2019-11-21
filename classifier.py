@@ -100,18 +100,18 @@ print(X_test)
 
 # feature selection(高維度 --> 低維度)
 #apply SelectKBest class to extract top 10 best features
-bestfeatures = SelectKBest(score_func=chi2, k=23)
-fit = bestfeatures.fit(X_train,y_train)
-dfscores = pd.DataFrame(fit.scores_)
-dfcolumns = pd.DataFrame(X_train.columns)
-#concat two dataframes for better visualization 
-featureScores = pd.concat([dfcolumns,dfscores],axis=1)
-featureScores.columns = ['Specs','Score']  #naming the dataframe columns
-print(featureScores.nsmallest(56,'Score').iloc[:, 0].values)  #print 60 lowest features
-print(featureScores.nlargest(10,'Score').iloc[:, 0].values) #print 6 best features
-irrelevant = featureScores.nsmallest(56,'Score').iloc[:, 0].values
-X_train.drop(labels=irrelevant, axis=1, inplace=True)
-X_test.drop(labels=irrelevant, axis=1, inplace=True)
+# bestfeatures = SelectKBest(score_func=chi2, k=23)
+# fit = bestfeatures.fit(X_train,y_train)
+# dfscores = pd.DataFrame(fit.scores_)
+# dfcolumns = pd.DataFrame(X_train.columns)
+# #concat two dataframes for better visualization 
+# featureScores = pd.concat([dfcolumns,dfscores],axis=1)
+# featureScores.columns = ['Specs','Score']  #naming the dataframe columns
+# print(featureScores.nsmallest(56,'Score').iloc[:, 0].values)  #print 60 lowest features
+# print(featureScores.nlargest(10,'Score').iloc[:, 0].values) #print 6 best features
+# irrelevant = featureScores.nsmallest(56,'Score').iloc[:, 0].values
+# X_train.drop(labels=irrelevant, axis=1, inplace=True)
+# X_test.drop(labels=irrelevant, axis=1, inplace=True)
 
 # outlier detection and removal
 # clf = IsolationForest( behaviour = 'new', max_samples=80, random_state = 1, contamination= 'auto')
@@ -121,22 +121,51 @@ X_test.drop(labels=irrelevant, axis=1, inplace=True)
 # X_train[(np.abs(z) < 3).all(axis=1)]
 # y_train[(np.abs(z) < 3).all(axis=1)]
 
-# imbalancing data 
+# imbalancing data
+
 # 方法1：很吃low dimension
-sm = SMOTE(random_state=27, ratio=1.0)
-X_train, y_train = sm.fit_sample(X_train, y_train)
-X_train = pd.DataFrame(data=X_train)
+# sm = SMOTE(random_state=27, ratio=1.0)
+# X_train, y_train = sm.fit_sample(X_train, y_train)
+# X_train = pd.DataFrame(data=X_train)
+# print(X_train)
+
+# 方法組：生成Yes Data或刪除No Data
+# concatenate our training data back together
+y_train = pd.DataFrame(data=y_train, columns=["Ans"])
+X = pd.concat([X_train, y_train], axis=1)
+
+# separate minority and majority classes
+not_fraud = X[X.Ans==0]
+fraud = X[X.Ans==1]
+
+# upsample minority
+fraud_upsampled = resample(fraud,
+                          replace=True, # sample with replacement
+                          n_samples=len(not_fraud), # match number in majority class
+                          random_state=27) # reproducible results
+
+# combine majority and upsampled minority
+upsampled = pd.concat([not_fraud, fraud_upsampled])
+
+not_fraud_downsampled = resample(not_fraud,
+                                replace = False, # sample without replacement
+                                n_samples = len(fraud), # match minority n
+                                random_state = 27) # reproducible results
+
+# combine minority and downsampled majority
+downsampled = pd.concat([not_fraud_downsampled, fraud])
+
+X_train = downsampled.iloc[:, :-1]
+y_train = downsampled.iloc[:, -1]
+
 print(X_train)
-# 方法2：丟掉No Data
-
-
-
+print(y_train)
 
 # 方法1：AdaBoost(0.87 -> 0.71732) (n_estimators = 200 -> 0.72948) (ne = 200, dimension = 10, without outlier remove --> 0.75987)
-AdaBoost = AdaBoostClassifier(n_estimators=200,learning_rate=1.0,algorithm='SAMME.R')
-AdaBoost.fit(X_train, y_train)
-prediction = AdaBoost.predict(X_test)
-score = AdaBoost.score(X_train, y_train)
+# AdaBoost = AdaBoostClassifier(n_estimators=200,learning_rate=1.0,algorithm='SAMME.R')
+# AdaBoost.fit(X_train, y_train)
+# prediction = AdaBoost.predict(X_test)
+# score = AdaBoost.score(X_train, y_train)
 # 方法2：GradientBoost(0.89 -> 0.70516)
 # gb_clf2 = GradientBoostingClassifier(n_estimators=800, learning_rate=0.5, max_features=3, max_depth=2, random_state=0)
 # gb_clf2.fit(X_train, y_train)
@@ -144,10 +173,10 @@ score = AdaBoost.score(X_train, y_train)
 # score = gb_clf2.score(X_train, y_train)
 
 # 方法3：隨機森林(1.0 -> 0.73252 : n_e = 75(without outlier detection) , n_e lower no enhance)
-# clf = RandomForestClassifier(n_estimators=250,max_features="auto",criterion="entropy", bootstrap=True)
-# clf.fit(X_train, y_train)
-# prediction = clf.predict(X_test)
-# score = clf.score(X_train, y_train)
+clf = RandomForestClassifier(n_estimators=250,max_features="auto",criterion="entropy", bootstrap=True)
+clf.fit(X_train, y_train)
+prediction = clf.predict(X_test)
+score = clf.score(X_train, y_train)
 print(prediction)
 print(score)
 
