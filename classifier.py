@@ -107,11 +107,19 @@ dfcolumns = pd.DataFrame(X_train.columns)
 #concat two dataframes for better visualization 
 featureScores = pd.concat([dfcolumns,dfscores],axis=1)
 featureScores.columns = ['Specs','Score']  #naming the dataframe columns
-print(featureScores.nsmallest(60,'Score').iloc[:, 0].values)  #print 60 lowest features
+print(featureScores.nsmallest(56,'Score').iloc[:, 0].values)  #print 60 lowest features
 print(featureScores.nlargest(6,'Score').iloc[:, 0].values) #print 6 best features
-irrelevant = featureScores.nsmallest(60,'Score').iloc[:, 0].values
+irrelevant = featureScores.nsmallest(56,'Score').iloc[:, 0].values
 X_train.drop(labels=irrelevant, axis=1, inplace=True)
 X_test.drop(labels=irrelevant, axis=1, inplace=True)
+
+# outlier detection and removal
+clf = IsolationForest( behaviour = 'new', max_samples=80, random_state = 1, contamination= 'auto')
+preds = clf.fit_predict(X_train)
+print(preds)
+z = stats.zscore(X_train)
+X_train[(np.abs(z) < 3).all(axis=1)]
+y_train[(np.abs(z) < 3).all(axis=1)]
 
 # imbalancing data 
 # 方法1：很吃low dimension
@@ -120,13 +128,6 @@ X_train, y_train = sm.fit_sample(X_train, y_train)
 X_train = pd.DataFrame(data=X_train)
 print(X_train)
 
-# outlier detection and removal
-clf = IsolationForest( behaviour = 'new', max_samples=100, random_state = 1, contamination= 'auto')
-preds = clf.fit_predict(X_train)
-print(preds)
-z = stats.zscore(X_train)
-X_train[(np.abs(z) < 3).all(axis=1)]
-y_train[(np.abs(z) < 3).all(axis=1)]
 
 # 方法1：AdaBoost(0.87 -> 0.71732) (n_estimators = 200 -> 0.72948)
 # AdaBoost = AdaBoostClassifier(n_estimators=150,learning_rate=1.0,algorithm='SAMME.R')
@@ -140,7 +141,7 @@ y_train[(np.abs(z) < 3).all(axis=1)]
 # score = gb_clf2.score(X_train, y_train)
 
 # 方法3：隨機森林(1.0 -> 0.73252 : n_e = 75(without outlier detection) , n_e lower no enhance)
-clf = RandomForestClassifier(n_estimators=150,max_features="auto",criterion="gini", bootstrap=True)
+clf = RandomForestClassifier(n_estimators=100,max_features="auto",criterion="gini", bootstrap=True)
 clf.fit(X_train, y_train)
 prediction = clf.predict(X_test)
 score = clf.score(X_train, y_train)
