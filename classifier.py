@@ -62,6 +62,7 @@ train_data.drop(labels="Attribute23", axis=1, inplace=True)
 # categorial data("YES", "NO") to (1, 0)
 labelencoder_Y = LabelEncoder()
 y_train = labelencoder_Y.fit_transform(y_train)
+y_train = pd.DataFrame(data=y_train, columns=["Ans"])
 print(y_train)
 
 # train and test all together
@@ -115,12 +116,25 @@ print(X_test)
 # X_test.drop(labels=irrelevant, axis=1, inplace=True)
 
 # outlier detection and removal
+# 方法1：隔離樹
 # clf = IsolationForest( behaviour = 'new', max_samples=80, random_state = 1, contamination= 'auto')
 # preds = clf.fit_predict(X_train)
 # print(preds)
 # z = stats.zscore(X_train)
 # X_train[(np.abs(z) < 3).all(axis=1)]
 # y_train[(np.abs(z) < 3).all(axis=1)]
+# 方法二：density based scan
+outlier_detection = DBSCAN(min_samples = 5, eps = 1.0)
+clusters = outlier_detection.fit_predict(X_train)
+clusters = list(clusters)
+print(clusters.count(-1))
+for i in range(len(list(clusters))):
+    if(clusters[i] == -1):
+        X_train.drop(labels=i, axis=0,inplace=True)
+        y_train.drop(labels=i, axis=0,inplace=True)
+
+
+
 
 # imbalancing data
 
@@ -132,18 +146,23 @@ print(X_test)
 
 # 方法組：生成Yes Data或刪除No Data
 # concatenate our training data back together
-y_train = pd.DataFrame(data=y_train, columns=["Ans"])
+
 X = pd.concat([X_train, y_train], axis=1)
 
 # separate minority and majority classes
 not_fraud = X[X.Ans==0]
 fraud = X[X.Ans==1]
+print("not_fraud = ", len(not_fraud))
+print("fraud = ", len(fraud))
+
+#random seed generate
+randomNumber = round(random()*1000)
 
 # upsample minority
 fraud_upsampled = resample(fraud,
                           replace=True, # sample with replacement
                           n_samples=len(not_fraud), # match number in majority class
-                          random_state=round(random()*1000)) # reproducible results
+                          random_state=randomNumber) # reproducible results
 
 # combine majority and upsampled minority
 upsampled = pd.concat([not_fraud, fraud_upsampled])
@@ -151,7 +170,7 @@ upsampled = pd.concat([not_fraud, fraud_upsampled])
 not_fraud_downsampled = resample(not_fraud,
                                 replace = False, # sample without replacement
                                 n_samples = len(fraud), # match minority n
-                                random_state = round(random()*1000)) # reproducible results
+                                random_state = randomNumber) # reproducible results
 
 # combine minority and downsampled majority
 downsampled = pd.concat([not_fraud_downsampled, fraud])
@@ -161,6 +180,7 @@ y_train = downsampled.iloc[:, -1]
 
 print(X_train)
 print(y_train)
+print("randomNumber = ", randomNumber)
 
 # 方法1：AdaBoost(0.87 -> 0.71732) (n_estimators = 200 -> 0.72948) (ne = 200, dimension = 10, without outlier remove --> 0.75987)
 # AdaBoost = AdaBoostClassifier(n_estimators=200,learning_rate=1.0,algorithm='SAMME.R')
@@ -209,6 +229,13 @@ with open('output5.csv', 'w', newline='') as csvfile:
     # 寫入另外幾列資料
     for i in range(len(prediction)):
         writer.writerow([float(i), prediction[i]])
+
+with open('random.csv', 'a', newline='') as csvfile:
+    # 建立 CSV 檔寫入器
+    writer = csv.writer(csvfile)
+    writer.writerow(["random = ", randomNumber])
+
+
 
 # scaler = MinMaxScaler()
 # X_train = scaler.fit_transform(X_train)
