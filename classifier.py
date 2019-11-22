@@ -109,9 +109,9 @@ dfcolumns = pd.DataFrame(X_train.columns)
 #concat two dataframes for better visualization 
 featureScores = pd.concat([dfcolumns,dfscores],axis=1)
 featureScores.columns = ['Specs','Score']  #naming the dataframe columns
-print(featureScores.nsmallest(56,'Score').iloc[:, 0].values)  #print 60 lowest features
-print(featureScores.nlargest(10,'Score').iloc[:, 0].values) #print 6 best features
-irrelevant = featureScores.nsmallest(56,'Score').iloc[:, 0].values
+print(featureScores.nsmallest(56,'Score'))  #print 60 lowest features
+print(featureScores.nlargest(10,'Score')) #print 6 best features
+irrelevant = featureScores.nsmallest(48,'Score').iloc[:, 0].values
 X_train.drop(labels=irrelevant, axis=1, inplace=True)
 X_test.drop(labels=irrelevant, axis=1, inplace=True)
 
@@ -216,6 +216,7 @@ print(score)
 # prediction = eclf.predict(X_test)
 # score = eclf.score(X_train, y_train)
 
+# 視覺化結果資料
 plt.hist(prediction)
 plt.show()
 
