@@ -102,18 +102,18 @@ print(X_test)
 
 # feature selection(高維度 --> 低維度)
 #apply SelectKBest class to extract top 10 best features
-# bestfeatures = SelectKBest(score_func=chi2, k=23)
-# fit = bestfeatures.fit(X_train,y_train)
-# dfscores = pd.DataFrame(fit.scores_)
-# dfcolumns = pd.DataFrame(X_train.columns)
-# #concat two dataframes for better visualization 
-# featureScores = pd.concat([dfcolumns,dfscores],axis=1)
-# featureScores.columns = ['Specs','Score']  #naming the dataframe columns
-# print(featureScores.nsmallest(56,'Score').iloc[:, 0].values)  #print 60 lowest features
-# print(featureScores.nlargest(10,'Score').iloc[:, 0].values) #print 6 best features
-# irrelevant = featureScores.nsmallest(56,'Score').iloc[:, 0].values
-# X_train.drop(labels=irrelevant, axis=1, inplace=True)
-# X_test.drop(labels=irrelevant, axis=1, inplace=True)
+bestfeatures = SelectKBest(score_func=chi2, k=23)
+fit = bestfeatures.fit(X_train,y_train)
+dfscores = pd.DataFrame(fit.scores_)
+dfcolumns = pd.DataFrame(X_train.columns)
+#concat two dataframes for better visualization 
+featureScores = pd.concat([dfcolumns,dfscores],axis=1)
+featureScores.columns = ['Specs','Score']  #naming the dataframe columns
+print(featureScores.nsmallest(56,'Score').iloc[:, 0].values)  #print 60 lowest features
+print(featureScores.nlargest(10,'Score').iloc[:, 0].values) #print 6 best features
+irrelevant = featureScores.nsmallest(56,'Score').iloc[:, 0].values
+X_train.drop(labels=irrelevant, axis=1, inplace=True)
+X_test.drop(labels=irrelevant, axis=1, inplace=True)
 
 # outlier detection and removal
 # 方法1：隔離樹
@@ -124,14 +124,14 @@ print(X_test)
 # X_train[(np.abs(z) < 3).all(axis=1)]
 # y_train[(np.abs(z) < 3).all(axis=1)]
 # 方法二：density based scan
-outlier_detection = DBSCAN(min_samples = 5, eps = 1.0)
-clusters = outlier_detection.fit_predict(X_train)
-clusters = list(clusters)
-print(clusters.count(-1))
-for i in range(len(list(clusters))):
-    if(clusters[i] == -1):
-        X_train.drop(labels=i, axis=0,inplace=True)
-        y_train.drop(labels=i, axis=0,inplace=True)
+# outlier_detection = DBSCAN(min_samples = 5, eps = 1.0)
+# clusters = outlier_detection.fit_predict(X_train)
+# clusters = list(clusters)
+# print(clusters.count(-1))
+# for i in range(len(list(clusters))):
+#     if(clusters[i] == -1):
+#         X_train.drop(labels=i, axis=0,inplace=True)
+#         y_train.drop(labels=i, axis=0,inplace=True)
 
 
 
@@ -156,7 +156,7 @@ print("not_fraud = ", len(not_fraud))
 print("fraud = ", len(fraud))
 
 #random seed generate
-randomNumber = round(random()*1000)
+randomNumber = 533
 
 # upsample minority
 fraud_upsampled = resample(fraud,
@@ -183,10 +183,10 @@ print(y_train)
 print("randomNumber = ", randomNumber)
 
 # 方法1：AdaBoost(0.87 -> 0.71732) (n_estimators = 200 -> 0.72948) (ne = 200, dimension = 10, without outlier remove --> 0.75987)
-# AdaBoost = AdaBoostClassifier(n_estimators=200,learning_rate=1.0,algorithm='SAMME.R')
-# AdaBoost.fit(X_train, y_train)
-# prediction = AdaBoost.predict(X_test)
-# score = AdaBoost.score(X_train, y_train)
+AdaBoost = AdaBoostClassifier(n_estimators=165,learning_rate=1.0,algorithm='SAMME.R')
+AdaBoost.fit(X_train, y_train)
+prediction = AdaBoost.predict(X_test)
+score = AdaBoost.score(X_train, y_train)
 # 方法2：GradientBoost(0.89 -> 0.70516)
 # gb_clf2 = GradientBoostingClassifier(n_estimators=800, learning_rate=0.5, max_features=3, max_depth=2, random_state=0)
 # gb_clf2.fit(X_train, y_train)
@@ -195,10 +195,10 @@ print("randomNumber = ", randomNumber)
 
 # 方法3：隨機森林(1.0 -> 0.73252 : n_e = 75(without outlier detection) , n_e lower no enhance)
 # best
-clf = RandomForestClassifier(n_estimators=250,max_features="auto",criterion="entropy", bootstrap=True)
-clf.fit(X_train, y_train)
-prediction = clf.predict(X_test)
-score = clf.score(X_train, y_train)
+# clf = RandomForestClassifier(n_estimators=150,max_features="auto",criterion="entropy", bootstrap=True)
+# clf.fit(X_train, y_train)
+# prediction = clf.predict(X_test)
+# score = clf.score(X_train, y_train)
 print(prediction)
 print(score)
 
@@ -216,13 +216,14 @@ print(score)
 # prediction = eclf.predict(X_test)
 # score = eclf.score(X_train, y_train)
 
-
+plt.hist(prediction)
+plt.show()
 
 
 
 
 # 開啟輸出的 CSV 檔案
-with open('output5.csv', 'w', newline='') as csvfile:
+with open('output21.csv', 'w', newline='') as csvfile:
     # 建立 CSV 檔寫入器
     writer = csv.writer(csvfile)
     # 寫入一列資料
