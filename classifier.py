@@ -1,25 +1,3 @@
-# import pandas as pd
-# import numpy as np
-# from sklearn.ensemble import AdaBoostClassifier
-# from sklearn.preprocessing import LabelEncoder
-# from sklearn.tree import DecisionTreeClassifier
-
-# dataset = pd.read_csv("train.csv")
-
-# for label in dataset.columns:
-#     dataset[label].replace('', np.nan, inplace=True) # null cells become nan
-#     dataset[label] = LabelEncoder().fit(dataset[label]).transform(dataset[label])
-    
-# X = dataset.drop(['Attribute23'],axis=1)
-# Y = dataset['Attribute23']
-# #model = DecisionTreeClassifier(criterion='entropy',max_depth=1)
-# #AdaBoost = AdaBoostClassifier(base_estimator= model,n_estimators=400,learning_rate=1)
-# AdaBoost = AdaBoostClassifier(n_estimators=400,learning_rate=1,algorithm='SAMME')
-# AdaBoost.fit(X,Y)
-# prediction = AdaBoost.score(X,Y)
-# print('The accuracy is: ',prediction*100,'%')
-
-
 import numpy as np # used for handling numbers
 import pandas as pd # used for handling the dataset
 from sklearn.impute import SimpleImputer # used for handling missing data
@@ -237,26 +215,3 @@ with open('random.csv', 'a', newline='') as csvfile:
     # 建立 CSV 檔寫入器
     writer = csv.writer(csvfile)
     writer.writerow(["random = ", randomNumber])
-
-
-
-# scaler = MinMaxScaler()
-# X_train = scaler.fit_transform(X_train)
-# X_test = scaler.transform(X_test)
-
-# state = 12  
-# test_size = 0.30  
-  
-# X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=test_size, random_state=state)
-
-# gb_clf2 = GradientBoostingClassifier(n_estimators=20, learning_rate=0.5, max_features=2, max_depth=2, random_state=0)
-# gb_clf2.fit(X_train, y_train)
-# predictions = gb_clf2.predict(X_val)
-
-# print("Confusion Matrix:")
-# print(confusion_matrix(y_val, predictions))
-
-# print("Classification Report")
-# print(classification_report(y_val, predictions))
-
-# print(predictions)
